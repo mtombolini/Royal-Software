@@ -9,6 +9,7 @@ import parametros
 import preprocesamiento
 from datetime import datetime, timedelta
 
+
 # --------------------------
 # Funciones de análisis
 # --------------------------
@@ -28,6 +29,7 @@ def analisis_producto_por_fecha(dataframe, sku, fecha_inicio, fecha_fin):
             f"Unidades vendidas: {unidades_vendidas}\n"
             f"Unidades devueltas: {unidades_devueltas}\n"
             f"Última fecha de venta: {ultima_fecha_venta}")
+
 
 # Función para graficar ventas por semana de un SKU específico en un rango de fechas
 def grafico_ventas_por_semana_por_fecha(dataframe, sku, fecha_inicio, fecha_fin):
@@ -70,6 +72,7 @@ def grafico_ventas_por_semana_por_fecha(dataframe, sku, fecha_inicio, fecha_fin)
     plt.tight_layout()
 
     plt.show()
+
 
 # --------------------------
 # Programa principal
