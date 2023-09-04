@@ -82,7 +82,7 @@ dataframe_1 = preprocesamiento.lectura(parametros.RUTA_REPORTE_INGRESOS)
 dataframe_1['Fecha'] = pd.to_datetime(dataframe_1['Fecha'], dayfirst=True)
 
 # Parámetros de análisis
-sku_a_analizar = '6010262'
+sku_a_analizar = '1500'
 fecha_inicio_analisis = pd.to_datetime('2022-01-01')
 fecha_fin_analisis = pd.to_datetime('2023-08-31')
 

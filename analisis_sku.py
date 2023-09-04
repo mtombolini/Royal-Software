@@ -17,7 +17,7 @@ from datetime import datetime, timedelta
 # Función para graficar stock acumulado de un SKU específico en un rango de fechas
 def grafico_stock_acumulado_por_fecha(dataframe_venta, dataframe_stock, sku, fecha_inicio, fecha_fin):
     df_venta_producto = dataframe_venta[(dataframe_venta['SKU'] == sku) & ((dataframe_venta['Fecha Venta'] >= fecha_inicio) & (dataframe_venta['Fecha Venta'] <= fecha_fin))]
-    df_stock_producto = dataframe_stock[(dataframe_stock['SKU'] == sku) & ((dataframe_venta['Fecha'] >= fecha_inicio) & (dataframe_stock['Fecha'] <= fecha_fin))]
+    df_stock_producto = dataframe_stock[(dataframe_stock['SKU'] == sku) & ((dataframe_stock['Fecha'] >= fecha_inicio) & (dataframe_stock['Fecha'] <= fecha_fin))]
 
     if df_venta_producto.empty or df_stock_producto.empty:
         print(f"No se encontraron registros para el SKU: {sku}")
@@ -28,16 +28,31 @@ def grafico_stock_acumulado_por_fecha(dataframe_venta, dataframe_stock, sku, fec
     df_compras = df_stock_producto[df_stock_producto['Documento de Recepción'].str.contains('Factura', case=False)].copy()
     df_ventas = df_venta_producto[df_venta_producto['Tipo Movimiento'] == 'Venta'].copy()
 
+
+    # Renombrar la columna 'Fecha Venta' en df_ventas para que sea 'Fecha'
+    #df_venta_producto = df_venta_producto.copy()
+    df_ventas.rename(columns={'Fecha Venta': 'Fecha'}, inplace=True)
+
     # Etiquetar las filas
     df_ingresos['Tipo'] = 'Ingreso'
     df_compras['Tipo'] = 'Compra'
     df_ventas['Tipo'] = 'Venta'
 
+    # Indicar el signo de cada operación
+    df_ingresos['Signo'] = 1
+    df_compras['Signo'] = 1
+    df_ventas['Signo'] = -1  # Para restar las ventas
+
     # Unir y ordenar
     df_unificado = pd.concat([df_ingresos, df_compras, df_ventas]).sort_values('Fecha')
 
-    # Calcular el stock acumulado para todo (ingresos y compras)
-    df_unificado['Stock Acumulado'] = df_unificado['Cantidad'].cumsum()
+    # ==== TEST
+    # Para exportar un DataFrame a Excel
+    df_unificado.to_excel("dataframe_unificado.xlsx", index=False)
+
+
+    # Calcular el stock acumulado
+    df_unificado['Stock Acumulado'] = (df_unificado['Cantidad'] * df_unificado['Signo']).cumsum()
 
     # Graficar
     plt.figure(figsize=(12, 8))
@@ -69,8 +84,8 @@ dataframe_stock = preprocesamiento.lectura(parametros.RUTA_REPORTE_INGRESOS)
 dataframe_stock['Fecha'] = pd.to_datetime(dataframe_stock['Fecha'], dayfirst=True)
 
 # Parámetros de análisis
-sku_a_analizar = '1500'
-fecha_inicio_analisis = pd.to_datetime('2023-01-01')
+sku_a_analizar = '62100-44AB2-019'
+fecha_inicio_analisis = pd.to_datetime('2022-09-01')
 fecha_fin_analisis = pd.to_datetime('2023-08-31')
 
 # Ejecutar las funciones de análisis y gráficos

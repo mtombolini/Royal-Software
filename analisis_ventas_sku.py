@@ -83,8 +83,8 @@ dataframe_1 = preprocesamiento.lectura(parametros.RUTA_REPORTE_VENTAS)
 dataframe_1['Fecha Venta'] = pd.to_datetime(dataframe_1['Fecha Venta'], dayfirst=True)
 
 # Parámetros de análisis
-sku_a_analizar = '1500'
-fecha_inicio_analisis = pd.to_datetime('2023-01-01')
+sku_a_analizar = 'YTX7A-BS/SLA'
+fecha_inicio_analisis = pd.to_datetime('2022-01-01')
 fecha_fin_analisis = pd.to_datetime('2023-08-31')
 
 # Ejecutar las funciones de análisis y gráficos
