@@ -7,8 +7,8 @@ import pandas as pd
 
 
 # Funciones
-def lectura(archivo):
-    dataframe = pd.read_excel(archivo, engine='openpyxl', header=5)
+def lectura(archivo, header):
+    dataframe = pd.read_excel(archivo, engine='openpyxl', header=header)
     return dataframe
 
 
