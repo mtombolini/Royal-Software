@@ -73,10 +73,8 @@ class ProcesadorSku():
         ventas_mensuales = dataframe_ventas.resample('M').sum()
         ventas_mensuales.index = ventas_mensuales.index.strftime('%B-%Y')
         
-        print("Ventas mensuales:\n", ventas_mensuales['Cantidad'])
-
-        
-
+        return(f"Ventas mensuales: {ventas_mensuales['Cantidad']}\n"
+               f"Ventas totales: {ventas_mensuales['Cantidad'].sum()}")
 
     
     def busqueda_alternativo(self):
@@ -92,7 +90,7 @@ class ProcesadorSku():
             return texto
 
         nombre_procesado = modificar_string(self.nombre)
-        df_alternativos = self.df_productos[self.df_productos['Nombre del Producto'].str.contains(nombre_procesado, case=False, regex=True)]
+        df_alternativos = self.df_productos[self.df_productos['Nombre del Producto'].str.contains(nombre_procesado, case=False, regex=False)]
         sku_alternativos = df_alternativos['SKU'].tolist()
         return sku_alternativos
     
@@ -108,6 +106,9 @@ class ProcesadorSku():
         print(self.informacion_venta_total())
         print("----------------------------------------------------------------- ")
         print(f'Productos alternativos: {self.busqueda_alternativo()}')
+        print("----------------------------------------------------------------- ")
+        print(self.informacion_venta_periodica())
+        print("----------------------------------------------------------------- ")
         print("")
 
     def procesador_dataframe_stock_historico(self):
@@ -141,7 +142,8 @@ class ProcesadorSku():
         df_unificado = pd.concat([df_ingresos, df_compras, df_ventas, df_devoluciones, df_vacio]).sort_values('Fecha')
         df_unificado['Stock Acumulado'] = (df_unificado['Cantidad'] * df_unificado['Signo']).cumsum()
         df_completo = pd.merge(df_vacio, df_unificado, on='Fecha', how='left')
-        df_completo['Stock Acumulado'].fillna(method='ffill', inplace=True)
+        df_completo['Stock Acumulado'].ffill(inplace=True)
+
         columnas_deseadas = ['Sucursal', 'Fecha', 'Usuario', 'Vendedor', 'SKU', 'Cantidad', 'Tipo_x', 'Stock Acumulado']
         
         df_completo = df_completo.loc[:, columnas_deseadas]
@@ -165,9 +167,6 @@ class ProcesadorSku():
         df_semana.to_excel("ventasdataframe.xlsx", index=False)
 
         return df_semana
-    
-    
-
        
     def visualizacion_grafico(self):
         df_1 = self.procesador_dataframe_stock_historico()
@@ -222,6 +221,4 @@ sku = '400273'
 
 procesador_sku = ProcesadorSku(dataframe_productos, dataframe_ventas, dataframe_stock, sku, fecha_inicio_analisis, fecha_fin_analisis)
 procesador_sku.impresion_información()
-procesador_sku.busqueda_alternativo()
-procesador_sku.informacion_venta_periodica()
 procesador_sku.visualizacion_grafico()
