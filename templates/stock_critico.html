@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplicación de Análisis Estadístico</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: "Helvetica", sans-serif;
+        }
+
+        .titulo-container {
+            padding: 10px;
+            display: flex; /* Utilizamos flexbox */
+            align-items: center; /* Alineación vertical al centro */
+            justify-content: center; /* Alineación horizontal al centro */
+            flex-wrap: wrap; /* Permitir que los elementos se envuelvan */
+            border-radius: 10px; /* Esquinas redondeadas */
+            background-color: #444;
+            margin: 10px;
+        }
+
+        .logo {
+            width: 120px;
+            margin-right: 20px;
+            margin-left: 20px; /* Ajusta el margen izquierdo para igualarlo al margen derecho */
+        }
+
+        .titulo {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0;
+            text-align: center;
+            color: white;
+        }
+
+        .contenido {
+            /* Agregar estilos para el contenido aquí */
+        }
+
+        .iframe-container {
+            /* Estilos para el contenedor del iframe */
+            width: 100%;
+            height: 600px; /* Ajusta la altura según tus necesidades */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="titulo-container">
+        <!-- Puedes agregar un logo aquí si tienes uno -->
+        <img src="{{ url_for('static', filename='imagenes/logo_blanco.png') }}" alt="Logo" class="logo">
+        <h1 class="titulo">STOCK CRÍTICO</h1>
+    </div>
+
+    <div class="contenido">
+        <!-- Aquí puedes agregar otros elementos de contenido -->
+
+        <!-- Insertar el contenido del archivo "tabla.html" dentro de un iframe -->
+        <div class="iframe-container">
+            <iframe src="/static/tabla.html" frameborder="0" width="100%" height="100%"></iframe>
+
+        </div>
+    </div>
+
+</body>
+</html>

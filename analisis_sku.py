@@ -5,197 +5,245 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import make_interp_spline
+from sklearn.linear_model import LinearRegression
 from pandas.tseries.offsets import MonthEnd
 import parametros
 import preprocesamiento
 from datetime import datetime, timedelta
 import re
+from statsmodels.tsa.arima.model import ARIMA
+from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
+from statsmodels.tsa.stattools import adfuller, acf, pacf
+
+
 
 # --------------------------
 # Funciones de análisis
 # --------------------------
 
+
 class ProcesadorSku():
-    def __init__(self, dataframe_productos, dataframe_venta, dataframe_stock, sku, fecha_inicio, fecha_fin):
+    def __init__(self, dataframe_productos, dataframe_venta, dataframe_recepcion, dataframe_stock, sku, fecha_inicio, fecha_fin):
+        # Input
         self.sku = sku
+        
+        # Parámetros de análisis
         self.f_inicio = fecha_inicio
         self.f_fin = fecha_fin
-        self.df_venta = dataframe_venta[(dataframe_venta['SKU'] == self.sku) & (dataframe_venta['Fecha Venta'] >= self.f_inicio) & (dataframe_venta['Fecha Venta'] <= self.f_fin)]
-        self.df_stock = dataframe_stock[(dataframe_stock['SKU'] == self.sku) & (dataframe_stock['Fecha'] >= self.f_inicio) & (dataframe_stock['Fecha'] <= self.f_fin)]
+
+        # Dataframes
+        self.df_venta = dataframe_venta[(dataframe_venta['SKU'] == sku) & (dataframe_venta['Fecha Venta'] >= self.f_inicio) & (dataframe_venta['Fecha Venta'] <= self.f_fin)]
+        self.df_recepcion = dataframe_recepcion[(dataframe_recepcion['SKU'] == sku) & (dataframe_recepcion['Fecha'] >= self.f_inicio) & (dataframe_recepcion['Fecha'] <= self.f_fin)]
         self.df_productos = dataframe_productos
-        self.nombre = self.df_venta['Producto / Servicio'].iloc[0]
+        self.df_stock = dataframe_stock[(dataframe_stock['SKU'] == sku)]
 
-    def verificacion_existencia(self):
-        if self.df_venta.empty or self.df_stock.empty:
-            return f"No se encontraron registros para el SKU: {self.sku}"
+        # Verificaciones
+        self.verificacion_sku = self.sku_valido()
+        self.verificacion_kardex = self.kardex_valido()
 
-    def tipo_producto(self):
-        resultado = re.search(r'\[(.*?)\]', self.nombre)
-        if resultado:
-            descuento = resultado.group(1)
-            if descuento == "IM":
-                return "IMPORTACION"
-            elif descuento == "PZ":
-                return "PLAZA"
-            elif descuento == "OF":
-                return "OFERTA"
-            else:
-                return "ERROR"
+        # Atributos del producto
+        self.nombre = self.obtener_nombre()
+        self.tipo = self.obtener_tipo()
+        self.stock = self.obtener_stock()
+        
+
+    # Función para verificar sku válido
+    def sku_valido(self):
+        if self.sku in self.df_productos['SKU'].values:
+            return True
         else:
-            return "No se encontró el tipo de producto entre corchetes."
+            print(f"Error, el sku {self.sku} no es válido.")
+            return False
         
-    def informacion_inventario(self):
-        unidades_ingresadas = self.df_stock[self.df_stock['Nota'] == 'Importar Stock: Matías González']['Cantidad'].sum()
-        unidades_compradas = self.df_stock[self.df_stock['Documento de Recepción'].str.contains('Factura', case=False)]['Cantidad'].sum()
-        ultima_fecha_compra = self.df_stock[self.df_stock['Documento de Recepción'].str.contains('Factura', case=False)]['Fecha'].max()
-
-        return (f"Unidades ingresadas: {unidades_ingresadas}\n"
-                f"Unidades compradas: {unidades_compradas}\n"
-                f"Última fecha de compra: {ultima_fecha_compra}")
-      
-    def informacion_venta_total(self):
-        unidades_vendidas = self.df_venta[self.df_venta['Tipo Movimiento'] == 'Venta']['Cantidad'].sum()
-        unidades_devueltas = self.df_venta[self.df_venta['Tipo Movimiento'] == 'Devolucion']['Cantidad'].sum()
-        ultima_fecha_venta = self.df_venta['Fecha Venta'].max()
-
-        return (f"Unidades vendidas: {unidades_vendidas}\n"
-                f"Unidades devueltas: {unidades_devueltas}\n"
-                f"Última fecha de venta: {ultima_fecha_venta}")
-    
-    def informacion_venta_periodica(self):
-        columnas_deseadas = ['Tipo Movimiento', 'SKU', 'Cantidad']
-        dataframe_ventas = self.df_venta.copy()
-        dataframe_ventas['Fecha Venta'] = pd.to_datetime(dataframe_ventas['Fecha Venta'])
-        dataframe_ventas.set_index('Fecha Venta', inplace=True)
-        dataframe_ventas = dataframe_ventas.loc[:, columnas_deseadas]
-        dataframe_ventas.to_excel("ventasdata.xlsx", index=False)
-
-        ventas_mensuales = dataframe_ventas.resample('M').sum()
-        ventas_mensuales.index = ventas_mensuales.index.strftime('%B-%Y')
         
-        return(f"Ventas mensuales: {ventas_mensuales['Cantidad']}\n"
-               f"Ventas totales: {ventas_mensuales['Cantidad'].sum()}")
+    # Función para verificar kardex con movimientos
+    def kardex_valido(self):
+        if self.verificacion_sku:
+            if self.df_venta.empty and self.df_recepcion.empty:
+                # print(f"El SKU {self.sku} no tiene movimientos en el kardex")
+                return False
+            else:
+                return True
+    
+
+    # Función para obtener el nombre del producto
+    def obtener_nombre(self):
+        if self.verificacion_sku:
+            nombre = self.df_productos.loc[self.df_productos['SKU'] == self.sku, 'Nombre del Producto'].values
+            if len(nombre) > 0:
+                return nombre[0]
+            else:
+                return f"No se encontró un nombre para el SKU {self.sku}"
 
     
-    def busqueda_alternativo(self):
-        def modificar_string(texto):
-            # Eliminar contenido entre '' usando una expresión regular
-            texto = re.sub(r"''[^']*''", '', texto)
+    # Función para obtener el tipo de producto (descuento) del producto    
+    def obtener_tipo(self):
+        if self.verificacion_sku:
+            resultado = re.search(r'\[(.*?)\]', self.nombre)
             
-            # Eliminar contenido entre [] y lo que sigue después de los corchetes
-            texto = re.sub(r'\[[^\]]*\].*', '', texto)
+            tipos = {"IM": "IMPORTACION",
+                    "PZ": "PLAZA",
+                    "OF": "OFERTA"}
             
-            # Eliminar espacios en blanco adicionales al final
-            texto = texto.strip()
-            return texto
-
-        nombre_procesado = modificar_string(self.nombre)
-        df_alternativos = self.df_productos[self.df_productos['Nombre del Producto'].str.contains(nombre_procesado, case=False, regex=False)]
-        sku_alternativos = df_alternativos['SKU'].tolist()
-        return sku_alternativos
+            if resultado:
+                descuento = resultado.group(1)
+                tipo = tipos.get(descuento, "ERROR")
+                return tipo
+            else:
+                return "No se encontró el tipo de producto entre corchetes."
+            
     
-    def impresion_información(self):
-        print("----------------------------------------------------------------- ")
-        print("---------------------INFORMACIÓN DE PRODUCTO---------------------")
-        print(f"SKU: {self.sku}")
-        print(f"PRODUCTO: {self.nombre}")
-        print(f'TIPO: {self.tipo_producto()}')
-        print("----------------------------------------------------------------- ")
-        print(self.informacion_inventario())
-        print("----------------------------------------------------------------- ")
-        print(self.informacion_venta_total())
-        print("----------------------------------------------------------------- ")
-        print(f'Productos alternativos: {self.busqueda_alternativo()}')
-        print("----------------------------------------------------------------- ")
-        print(self.informacion_venta_periodica())
-        print("----------------------------------------------------------------- ")
-        print("")
+    # Función para obtener el stock actual del producto
+    def obtener_stock(self):
+        if self.verificacion_sku:
+            stock_total = self.df_stock['Stock'].sum()
+            return stock_total
+    
+        
+    # Función para crear dataframe general (tarjeta de existencia)
+    def kardex(self):
+        df_recepcion = self.df_recepcion.copy()
+        df_ventas = self.df_venta.copy()
 
-    def procesador_dataframe_stock_historico(self):
-        # ---- GRAFICO STOCK EN EL TIEMPO ----
-        # Crear copias para evitar SettingWithCopyWarning
-        df_ingresos = self.df_stock[self.df_stock['Nota'] == 'Importar Stock: Matías González'].copy()
-        df_compras = self.df_stock[self.df_stock['Documento de Recepción'].str.contains('Factura', case=False)].copy()
-        df_ventas = self.df_venta[self.df_venta['Tipo Movimiento'] == 'Venta'].copy()
-        df_devoluciones = self.df_venta[self.df_venta['Tipo Movimiento'] == 'Devolucion'].copy()
-        df_vacio = pd.DataFrame(pd.date_range(start=self.f_inicio, end=self.f_fin), columns=['Fecha'])
+        columnas_df_recepcion = ["Fecha", "Documento de Recepción", "Nota", "SKU", "Cantidad"]
+        columnas_df_ventas = ["Tipo Movimiento", "Fecha Venta", "SKU", "Cantidad"]
 
-        # Renombrar la columna 'Fecha Venta' en df_ventas para que sea 'Fecha'
+        df_recepcion = df_recepcion.loc[:, columnas_df_recepcion]
+        df_ventas = df_ventas.loc[:, columnas_df_ventas]
+
         df_ventas.rename(columns={'Fecha Venta': 'Fecha'}, inplace=True)
-        df_devoluciones.rename(columns={'Fecha Venta': 'Fecha'}, inplace=True)
 
-        # Indicar el signo de cada operación
-        df_ingresos['Signo'] = 1
-        df_compras['Signo'] = 1
-        df_ventas['Signo'] = -1  # Para restar las ventas
-        df_devoluciones['Signo'] = 1
-        df_vacio['Signo'] = 0
+        df_kardex = pd.concat([df_recepcion, df_ventas])
 
-        # Indicar la naturaleza de cada operación
-        df_ingresos['Tipo'] = "Ingreso"
-        df_compras['Tipo'] = "Compra"
-        df_ventas['Tipo'] = "Venta"  # Para restar las ventas
-        df_devoluciones['Tipo'] = "Devolucion"
-        df_vacio['Tipo'] = "Sin Movimiento"
-
-        # Unir, ordenar y filtrar dataframe
-        df_unificado = pd.concat([df_ingresos, df_compras, df_ventas, df_devoluciones, df_vacio]).sort_values('Fecha')
-        df_unificado['Stock Acumulado'] = (df_unificado['Cantidad'] * df_unificado['Signo']).cumsum()
-        df_completo = pd.merge(df_vacio, df_unificado, on='Fecha', how='left')
-        df_completo['Stock Acumulado'].ffill(inplace=True)
-
-        columnas_deseadas = ['Sucursal', 'Fecha', 'Usuario', 'Vendedor', 'SKU', 'Cantidad', 'Tipo_x', 'Stock Acumulado']
+        df_kardex['Documento de Recepción'] = df_kardex['Documento de Recepción'].fillna('')
+        df_kardex.loc[df_kardex['Documento de Recepción'].str.contains('Factura', case=False), 'Tipo Movimiento'] = "Compra"
+        df_kardex.loc[df_kardex['Nota'] == 'Importar Stock: Matías González', 'Tipo Movimiento'] = 'Ingreso'
         
-        df_completo = df_completo.loc[:, columnas_deseadas]
+        df_kardex.loc[df_kardex['Tipo Movimiento'] == 'Compra', 'Signo'] = 1
+        df_kardex.loc[df_kardex['Tipo Movimiento'] == 'Ingreso', 'Signo'] = 1
+        df_kardex.loc[df_kardex['Tipo Movimiento'] == 'Venta', 'Signo'] = -1
+        df_kardex.loc[df_kardex['Tipo Movimiento'] == 'Devolucion', 'Signo'] = -1
 
-        # Guardar el DataFrame en un archivo Excel
-        df_completo.to_excel("hola_completo.xlsx", index=False)
-        return df_completo
+        df_kardex = df_kardex.sort_values('Fecha')
+        df_kardex['Stock'] = (df_kardex['Cantidad'] * df_kardex['Signo']).cumsum()
+        df_kardex = df_kardex.dropna(subset=['Tipo Movimiento'])
+        df_kardex = df_kardex.loc[:, ['Fecha', 'SKU', 'Cantidad', 'Tipo Movimiento', 'Stock']]
+        
+        # df_kardex.to_excel("kardex.xlsx", index=False)
 
-        '''
-        EXISTE ERROR AL EXPORTAR EL GRÁFICO, LA COLUMNA TIPO NO ESTA FUNCIONANDO CORRECTAMENTE
-        '''
+        return df_kardex
 
-    def procesador_dataframe_ventas_semanales(self):
-        df_ventas = self.df_venta[self.df_venta['Tipo Movimiento'] == 'Venta'].copy()
-        df_ventas.set_index('Fecha Venta', inplace=True)
-        df_semana = df_ventas[['Cantidad']].resample('W-Mon').sum()
 
-        # Crear un índice de fechas completo desde la fecha de inicio hasta la fecha final
-        indice_completo = pd.date_range(start=self.f_inicio, end=self.f_fin, freq='W-Mon')
-        df_semana = df_semana.reindex(indice_completo, fill_value=0)
-        df_semana.to_excel("ventasdataframe.xlsx", index=False)
+    # Funcion para calcular la cantidad de unidades vendidas por mes
+    def ventas_periodicas(self, periodo):
+        kardex = self.kardex()
 
-        return df_semana
-       
-    def visualizacion_grafico(self):
-        df_1 = self.procesador_dataframe_stock_historico()
-        df_2 = self.procesador_dataframe_ventas_semanales()
-        plt.figure(figsize=(12, 8))
+        kardex_ventas = kardex.loc[kardex['Tipo Movimiento'] == 'Venta'].copy()
+        kardex_ventas['Fecha'] = pd.to_datetime(kardex_ventas['Fecha'])
+        kardex_ventas.set_index('Fecha', inplace=True)
 
-        # Graficar dataframes originales
-        plt.plot(df_1['Fecha'], df_1['Stock Acumulado'], label='Stock histórico')
-        plt.plot(df_2.index, df_2['Cantidad'], label='Ventas por semana')
+        ventas = kardex_ventas.resample(periodo)['Cantidad'].sum()
 
-        # Creación de interpolaciones cúbicas para df_2
-        x_smooth_ventas = np.linspace(df_2.index.astype(np.int64).min(), df_2.index.astype(np.int64).max(), 300)
-        y_smooth_ventas = make_interp_spline(df_2.index.astype(np.int64), df_2['Cantidad'], k=3)(x_smooth_ventas)
-        plt.plot(pd.to_datetime(x_smooth_ventas, unit='ns'), y_smooth_ventas, label='Interpolación cúbica ventas', color='green', linewidth=2)
+        # ventas.to_excel("mensuales.xlsx")
 
-        # ---- PENDIENTE DE ARREGLO ----
-        # x_smooth_stock = np.linspace(df_1.index.astype(np.int64).min(), df_1.index.astype(np.int64).max(), 300)
-        # y_smooth_stock = make_interp_spline(df_1.index.astype(np.int64), df_1['Stock Acumulado'], k=3)(x_smooth_stock)
-        # plt.plot(pd.to_datetime(x_smooth_stock, unit='ns'), y_smooth_stock, label='Interpolación cúbica stock', color='black', linewidth=2)
-        # ------------------------------
+        return ventas
+    
 
-        plt.xlabel('Fecha')
-        plt.ylabel('Stock acumulado')
-        plt.title(f"Stock acumulado por fecha - SKU: {sku}")
-        plt.xticks(rotation=45)
+    def stock_tiempo(self):
+        kardex = self.kardex()
+        df_vacio = pd.DataFrame(pd.date_range(start=self.f_inicio, end=self.f_fin), columns=['Fecha'])
+        df_ajustado = df_completo = pd.merge(df_vacio, kardex, on='Fecha', how='left')
+        df_ajustado['Stock'].ffill(inplace=True)
+        return df_ajustado
+
+
+    # Función para calcular parámetros estadísticos de ventas periodicas
+    def analisis_ventas_periodicas(self, periodo):
+        ventas = self.ventas_periodicas(periodo)
+
+        # Estadísticas Descriptivas
+        media = np.mean(ventas)
+        mediana = np.median(ventas)
+        desviacion_estandar = np.std(ventas)
+        
+        print(f"Media de Ventas: {media}")
+        print(f"Mediana de Ventas: {mediana}")
+        print(f"Desviación Estándar de Ventas: {desviacion_estandar}")
+        
+        # Gráfica de Ventas a lo largo del tiempo
+        plt.figure(figsize=(12, 6))
+        plt.plot(ventas.index, ventas.values, marker='o', linestyle='-')
+        plt.title("Ventas Periódicas")
+        plt.xlabel("Fecha")
+        plt.ylabel("Cantidad Vendida")
         plt.grid(True)
-        plt.legend()
-        plt.tight_layout()
         plt.show()
+        
+        # Autocorrelación
+        autocorrelacion = ventas.autocorr(lag=1)  # Autocorrelación con un retraso (lag) de 1 periodo
+        print(f"Autocorrelación con un periodo de retraso: {autocorrelacion}")
+
+        # Percentiles
+        percentil_25 = np.percentile(ventas.dropna(), 25)
+        percentil_75 = np.percentile(ventas.dropna(), 75)
+        print(f"Percentil 25: {percentil_25}")
+        print(f"Percentil 75: {percentil_75}")
+
+        # Estacionalidad (descomposición básica usando promedio móvil, por ejemplo)
+        ventas_rolling = ventas.rolling(window=4).mean()
+        plt.figure(figsize=(12, 6))
+        plt.plot(ventas.index, ventas.values, label='Original')
+        plt.plot(ventas_rolling.index, ventas_rolling.values, label='Promedio Móvil')
+        plt.legend(loc='best')
+        plt.title("Estacionalidad en Ventas")
+        plt.grid(True)
+        plt.show()
+
+    
+    def prediccion(self):
+        # Calcular el promedio móvil de 3 meses (trimestral)
+        ventas = self.ventas_periodicas('W')  # Obtener ventas semanales (cambia 'M' por 'W')
+        promedio_movil = ventas.rolling(window=3).mean()  # Calcular el promedio móvil de 3 semanas
+
+        # Pronosticar la próxima semana (el último valor del promedio móvil)
+        ultimo_valor_promedio_movil = promedio_movil.iloc[-1]
+
+        # Agregar el pronóstico a la serie de ventas semanales
+        fecha_proxima_semana = ventas.index[-1] + pd.DateOffset(weeks=1)  # Calcula la fecha de la próxima semana
+        ventas.loc[fecha_proxima_semana] = ultimo_valor_promedio_movil
+
+        # Mostrar el pronóstico
+        print(f"Pronóstico para la próxima semana ({fecha_proxima_semana}): {ultimo_valor_promedio_movil}")
+
+
+    def deteccion(self):
+        if self.verificacion_sku and self.verificacion_kardex:
+            df_stock = self.stock_tiempo()
+            # print(f'SKU: {self.sku}')
+
+            dias_stock = (df_stock['Stock'] > 0).sum()
+            unidades_vendidas = df_stock[df_stock['Tipo Movimiento'] == 'Venta']['Cantidad'].sum()
+            
+            #print(dias_stock)
+            #print(unidades_vendidas)
+            # print(f'RMM: {RMM}')
+
+            if self.stock == 0:
+                if dias_stock > 100:
+                    RMM = round((unidades_vendidas / dias_stock) * 30)
+                    if RMM >= 1:
+                        #print(f'El SKU: {self.sku} requiere la compra de {RMM} unidades.')
+                        return RMM
+
+
+    def informacion_compactada(self):
+        unidades = self.deteccion()
+        if isinstance(unidades, int) and unidades >= 1:
+            return (self.sku, self.nombre, unidades)
+
+
+                
+                
 
 
 
@@ -206,19 +254,33 @@ class ProcesadorSku():
 # Leer el DataFrame y convertir la columna de fechas
 dataframe_ventas = preprocesamiento.lectura(parametros.RUTA_REPORTE_VENTAS, 5)
 dataframe_ventas['Fecha Venta'] = pd.to_datetime(dataframe_ventas['Fecha Venta'], dayfirst=True)
-dataframe_stock = preprocesamiento.lectura(parametros.RUTA_REPORTE_INGRESOS, 5)
-dataframe_stock['Fecha'] = pd.to_datetime(dataframe_stock['Fecha'], dayfirst=True)
+dataframe_recepcion = preprocesamiento.lectura(parametros.RUTA_REPORTE_INGRESOS, 6)
+dataframe_recepcion['Fecha'] = pd.to_datetime(dataframe_recepcion['Fecha'], dayfirst=True)
 dataframe_productos = preprocesamiento.lectura(parametros.RUTA_REPORTE_PRODUCTOS, 0)
+dataframe_stock = preprocesamiento.lectura(parametros.RUTA_REPORTE_STOCK, 4)
 
 # Parámetros de análisis
-sku_a_analizar = 'DA007'
+sku = '10178'
 fecha_inicio_analisis = pd.to_datetime('2022-09-01')
-fecha_fin_analisis = pd.to_datetime('2023-08-31')
+fecha_fin_analisis = pd.to_datetime('2023-09-10')
 
-sku = '400273'
-#sku = '400666'
+# Procesador 
+procesador_sku = ProcesadorSku(dataframe_productos, dataframe_ventas, dataframe_recepcion, dataframe_stock, sku, fecha_inicio_analisis, fecha_fin_analisis)
+# # procesador_sku.prediccion()
+# # procesador_sku.analisis_ventas_periodicas('D')
+procesador_sku.deteccion()
 
 
-procesador_sku = ProcesadorSku(dataframe_productos, dataframe_ventas, dataframe_stock, sku, fecha_inicio_analisis, fecha_fin_analisis)
-procesador_sku.impresion_información()
-procesador_sku.visualizacion_grafico()
+lista_sku = list(dataframe_productos['SKU'].unique())
+
+
+
+
+
+# for sku in lista_sku:
+#     procesador_sku = ProcesadorSku(dataframe_productos, dataframe_ventas, dataframe_recepcion, dataframe_stock, sku, fecha_inicio_analisis, fecha_fin_analisis)
+#     informacion = procesador_sku.informacion_compactada()
+#     if informacion != None:
+#         print(informacion)
+
+

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplicación de Análisis Estadístico</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: "Helvetica", sans-serif;
+        }
+
+        .titulo-container, .boton-container {
+            padding: 10px;
+            display: flex; /* Utilizamos flexbox */
+            align-items: center; /* Alineación vertical al centro */
+            justify-content: center; /* Alineación horizontal al centro */
+            flex-wrap: wrap; /* Permitir que los elementos se envuelvan */
+            border-radius: 10px; /* Esquinas redondeadas */
+        }
+
+        .titulo-container {
+            background-color: #444;
+            margin: 10px;
+        }
+
+        .boton-container {
+            /* Comenta o ajusta la siguiente línea para modificar la distancia desde arriba */
+            margin-top: 50px;
+            margin: 10px;
+            margin-left: 0; /* Elimina el margen izquierdo */
+            margin-right: 0; /* Elimina el margen derecho */
+        }
+
+        .logo {
+            width: 120px;
+            margin-right: 20px;
+            margin-left: 20px; /* Ajusta el margen izquierdo para igualarlo al margen derecho */
+        }
+
+        .titulo {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0;
+            text-align: center;
+            color: white;
+        }
+
+        .boton {
+            flex: 1; /* Ocupar el espacio disponible en el contenedor */
+            height: 120px; /* Aumentar la altura de los botones */
+            font-size: 18px;
+            font-weight: bold;  /* Letra en negrita */
+            border-radius: 10px; /* Bordes redondeados */
+            border: 1px solid transparent; /* Puedes ajustar el grosor del borde (1px en este caso) según tus necesidades */
+            background-color: rgb(200, 20, 20);
+            color: white;
+            display: flex; /* Utilizamos flexbox para alinear el icono y el texto */
+            flex-direction: column; /* Coloca el icono encima del texto */
+            align-items: center; /* Alinea el contenido al centro verticalmente */
+            justify-content: center; /* Alinea el contenido al centro horizontalmente */
+        }
+
+        .icon {
+            width: 60px; /* Ajusta el tamaño del icono según tus necesidades */
+            height: 60px; /* Ajusta el tamaño del icono según tus necesidades */
+            margin-bottom: 5px; /* Espacio entre el icono y el texto */
+        }
+
+        .spacer {
+            width: 30px; /* Ajusta el ancho fijo de separación entre botones */
+        }
+    </style>
+</head>
+<body>
+
+<div class="titulo-container">
+    <!-- Puedes agregar un logo aquí si tienes uno -->
+    <img src="{{ url_for('static', filename='imagenes/logo_blanco.png') }}" alt="Logo" class="logo">
+    <h1 class="titulo">ANÁLISIS ESTADÍSTICOS</h1>
+</div>
+
+<div class="boton-container">
+    <button id="btn-analizar" class="boton">
+        <img src="{{ url_for('static', filename='imagenes/icono_emergencia.png') }}" alt="Icono" class="icon"> 
+        STOCK CRÍTICO
+    </button>
+    <div class="spacer"></div> <!-- Espacio en blanco con ancho fijo -->
+    <button id="btn-otro" class="boton">
+        <img src="{{ url_for('static', filename='imagenes/icono_reposicion.png') }}" alt="Icono" class="icon"> 
+        REPOSICIÓN DE STOCK
+    </button>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#btn-analizar").click(function () {
+            // Abre una nueva ventana
+            window.open("/stock_roto_page", "_blank");
+        });
+    });
+</script>
+
+</body>
+</html>
