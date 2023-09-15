@@ -16,7 +16,6 @@ from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 from statsmodels.tsa.stattools import adfuller, acf, pacf
 
 
-
 # --------------------------
 # Funciones de análisis
 # --------------------------
@@ -240,47 +239,19 @@ class ProcesadorSku():
         unidades = self.deteccion()
         if isinstance(unidades, int) and unidades >= 1:
             return (self.sku, self.nombre, unidades)
+        
+    def informacion_detallada(self):
+        informacion = [self.sku, self.nombre, self.tipo]
+        return informacion
+    
+    def informacion_estadistica(self):
+        informacion = [self.tipo, self.sku]
+        return informacion
 
 
                 
                 
 
 
-
-# --------------------------
-# Programa principal
-# --------------------------
-
-# Leer el DataFrame y convertir la columna de fechas
-dataframe_ventas = preprocesamiento.lectura(parametros.RUTA_REPORTE_VENTAS, 5)
-dataframe_ventas['Fecha Venta'] = pd.to_datetime(dataframe_ventas['Fecha Venta'], dayfirst=True)
-dataframe_recepcion = preprocesamiento.lectura(parametros.RUTA_REPORTE_INGRESOS, 6)
-dataframe_recepcion['Fecha'] = pd.to_datetime(dataframe_recepcion['Fecha'], dayfirst=True)
-dataframe_productos = preprocesamiento.lectura(parametros.RUTA_REPORTE_PRODUCTOS, 0)
-dataframe_stock = preprocesamiento.lectura(parametros.RUTA_REPORTE_STOCK, 4)
-
-# Parámetros de análisis
-sku = '10178'
-fecha_inicio_analisis = pd.to_datetime('2022-09-01')
-fecha_fin_analisis = pd.to_datetime('2023-09-10')
-
-# Procesador 
-procesador_sku = ProcesadorSku(dataframe_productos, dataframe_ventas, dataframe_recepcion, dataframe_stock, sku, fecha_inicio_analisis, fecha_fin_analisis)
-# # procesador_sku.prediccion()
-# # procesador_sku.analisis_ventas_periodicas('D')
-procesador_sku.deteccion()
-
-
-lista_sku = list(dataframe_productos['SKU'].unique())
-
-
-
-
-
-# for sku in lista_sku:
-#     procesador_sku = ProcesadorSku(dataframe_productos, dataframe_ventas, dataframe_recepcion, dataframe_stock, sku, fecha_inicio_analisis, fecha_fin_analisis)
-#     informacion = procesador_sku.informacion_compactada()
-#     if informacion != None:
-#         print(informacion)
 
 

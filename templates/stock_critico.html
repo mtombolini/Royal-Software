@@ -12,11 +12,11 @@
 
         .titulo-container {
             padding: 10px;
-            display: flex; /* Utilizamos flexbox */
-            align-items: center; /* Alineación vertical al centro */
-            justify-content: center; /* Alineación horizontal al centro */
-            flex-wrap: wrap; /* Permitir que los elementos se envuelvan */
-            border-radius: 10px; /* Esquinas redondeadas */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            border-radius: 10px;
             background-color: #444;
             margin: 10px;
         }
@@ -24,7 +24,7 @@
         .logo {
             width: 120px;
             margin-right: 20px;
-            margin-left: 20px; /* Ajusta el margen izquierdo para igualarlo al margen derecho */
+            margin-left: 20px;
         }
 
         .titulo {
@@ -40,29 +40,137 @@
         }
 
         .iframe-container {
-            /* Estilos para el contenedor del iframe */
             width: 100%;
-            height: 600px; /* Ajusta la altura según tus necesidades */
+            height: 600px;
         }
+
+        .dropdown-container {
+            background-color: #ffd200;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            border-radius: 10px;
+            margin: 10px;
+            width: 200px;
+            height: 15px;
+        }
+
+        .dropdown-container img {
+            width: 24px;
+            height: 24px;
+            margin-right: 10px;
+        }
+
+        select {
+            flex: 1;
+        }
+
+        /* Estilo del botón de Actualizar */
+        .actualizar-button {
+            background-color: #ffd200;
+            color: black;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        /* Nuevo contenedor que envuelve la lista y el botón */
+        .container-flex {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin: 10px;
+        }
+
+        /* Nuevo contenedor para alinear la tabla con los márgenes */
+        .table-container {
+            margin: 10px; /* Márgenes izquierdo y derecho iguales al margen del título */
+            width: calc(100% - 20px); /* Ancho total menos los márgenes */
+        }
+
+        /* Estilo para hacer que la tabla ocupe todo el espacio horizontal */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        /* Estilo para el encabezado de la tabla */
+        table th {
+            background-color: red;
+            color: white;
+            padding: 5px; /* Ajustado para hacer que el ancho de la fila sea menor */
+        }
+
+        /* Estilo para las celdas de la tabla */
+        table td {
+            padding: 2px; /* Ajustado para hacer que el ancho de la fila sea menor */
+        }
+
+        /* Estilo para las filas impares */
+        table tr:nth-child(odd) {
+            background-color: #f2f2f2;
+        }
+
+        /* Estilo para las filas pares */
+        table tr:nth-child(even) {
+            background-color: #ffffff;
+        }
+
+        /* Estilo para centrar el botón dentro de la celda de la tabla */
+        table td button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+        }
+
+
     </style>
 </head>
 <body>
 
     <div class="titulo-container">
-        <!-- Puedes agregar un logo aquí si tienes uno -->
         <img src="{{ url_for('static', filename='imagenes/logo_blanco.png') }}" alt="Logo" class="logo">
         <h1 class="titulo">STOCK CRÍTICO</h1>
     </div>
 
-    <div class="contenido">
-        <!-- Aquí puedes agregar otros elementos de contenido -->
-
-        <!-- Insertar el contenido del archivo "tabla.html" dentro de un iframe -->
-        <div class="iframe-container">
-            <iframe src="/static/tabla.html" frameborder="0" width="100%" height="100%"></iframe>
-
+    <!-- Nuevo contenedor que envuelve la lista y el botón -->
+    <div class="container-flex">
+        <!-- Contenedor de la lista desplegable -->
+        <div class="dropdown-container">
+            <img src="{{ url_for('static', filename='imagenes/icono_ordenar.png') }}" alt="Icono">
+            <select id="ordenarPor">
+                <option value="nombre">Nombre</option>
+                <option value="fecha">Fecha</option>
+                <option value="precio">Precio</option>
+            </select>
         </div>
+
+        <!-- Botón de Actualizar -->
+        <button class="actualizar-button">Actualizar</button>
     </div>
 
+    <div class="contenido">
+        <!-- Nuevo contenedor para alinear la tabla con los márgenes -->
+        <div class="table-container">
+            <div class="iframe-container">
+                {{ tabla | safe }}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tu código JavaScript puede ir aquí si es necesario -->
+    <!-- Aquí viene el nuevo bloque de JavaScript -->
+    <script>
+        $(document).ready(function() {
+            // Escucha para el evento de clic en cualquier elemento con la clase "lupa-button"
+            $('.lupa-button').click(function() {
+                const sku = $(this).attr('data-sku'); // Obtener el SKU desde el atributo data-sku del botón
+                window.open(`/detalle/${sku}`, '_blank'); // Abrir una nueva ventana/tab con la URL "/detalle/SKU"
+            });
+        });
+    </script>
 </body>
 </html>

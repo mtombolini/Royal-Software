@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ sku }}</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: "Helvetica", sans-serif;
+        }
+
+        .titulo-container {
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            border-radius: 10px;
+            background-color: #444;
+            margin: 10px;
+        }
+
+        .logo {
+            width: 120px;
+            margin-right: 20px;
+            margin-left: 20px;
+        }
+
+        .titulo {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0;
+            text-align: center;
+            color: white;
+        }
+
+        .informacion-container {
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            border-radius: 10px;
+            background-color: red;
+            color: white;
+            margin: 20px 10px 10px 10px;
+            width: 40%;
+        }
+
+        .subtitulo-1 {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0;
+            text-align: center;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="titulo-container">
+        <img src="{{ url_for('static', filename='imagenes/logo_blanco.png') }}" alt="Logo" class="logo">
+        <h1 class="titulo">{{ sku }}</h1>
+    </div>
+
+    <div class="informacion-container">
+        <h1 class="subtitulo-1">INFORMACION DEL PRODUCTO</h1>
+    </div>
+
+    <!-- Aquí viene el nuevo bloque de JavaScript -->
+    <script>
+        $(document).ready(function() {
+            // Hacer una llamada AJAX para obtener información del producto
+            $.get(`/informacion_detallada/{{ sku }}`, function(data) {
+                // data será un objeto JSON con "info_producto" e "info_estadistica"
+                // Aquí puedes actualizar el HTML como desees, por ejemplo:
+                $(".informacion-container").append("<p>Información del Producto: " + data.info_producto + "</p>");
+                $(".informacion-container").append("<p>Información Estadística: " + data.info_estadistica + "</p>");
+            });
+        });
+    </script>
+
+</body>
+</html>

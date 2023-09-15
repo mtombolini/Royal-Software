@@ -217,7 +217,7 @@ fecha_fin_analisis = pd.to_datetime('2023-08-31')
 
 sku = '22121-HKE-000'
 sku = 'S026'
-#sku = '1500'
+sku = 'VF032'
 #sku = '400666'
 
 
