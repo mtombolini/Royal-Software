@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Meta Información y Título -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CARRO DE COMPRAS</title>
+
+    <!-- Hojas de Estilo y Scripts -->
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/carro_compras.css') }}">
+    <script src="{{ url_for('static', filename='js/carro_compras.js') }}" defer></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="scripts.js" defer></script>
+</head>
+
+<body>
+    <!-- Título y Logo -->
+    <div class="titulo-container">
+        <img src="{{ url_for('static', filename='imagenes/logo_blanco.png') }}" alt="Logo" class="logo">
+        <h1 class="titulo">CARRO DE COMPRAS</h1>
+    </div>
+
+    <!-- Contenedor de Productos -->
+    <div class="productos-container">
+        {% for producto in productos %}
+            <div class="producto">
+                <p>SKU: {{ producto.SKU }}</p>
+                <p>Estado: {{ producto.estado }}</p>
+            </div>
+        {% endfor %}
+    </div>
+</body>

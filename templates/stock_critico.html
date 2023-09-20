@@ -1,144 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Meta Información y Título -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aplicación de Análisis Estadístico</title>
+
+    <!-- Hojas de Estilo y Scripts -->
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/stock_critico.css') }}">
+    <script src="{{ url_for('static', filename='js/stock_critico.js') }}" defer></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <style>
-        body {
-            font-family: "Helvetica", sans-serif;
-        }
-
-        .titulo-container {
-            padding: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-wrap: wrap;
-            border-radius: 10px;
-            background-color: #444;
-            margin: 10px;
-        }
-
-        .logo {
-            width: 120px;
-            margin-right: 20px;
-            margin-left: 20px;
-        }
-
-        .titulo {
-            font-size: 24px;
-            font-weight: bold;
-            margin: 0;
-            text-align: center;
-            color: white;
-        }
-
-        .contenido {
-            /* Agregar estilos para el contenido aquí */
-        }
-
-        .iframe-container {
-            width: 100%;
-            height: 600px;
-        }
-
-        .dropdown-container {
-            background-color: #ffd200;
-            padding: 10px;
-            display: flex;
-            align-items: center;
-            border-radius: 10px;
-            margin: 10px;
-            width: 200px;
-            height: 15px;
-        }
-
-        .dropdown-container img {
-            width: 24px;
-            height: 24px;
-            margin-right: 10px;
-        }
-
-        select {
-            flex: 1;
-        }
-
-        /* Estilo del botón de Actualizar */
-        .actualizar-button {
-            background-color: #ffd200;
-            color: black;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 10px;
-            cursor: pointer;
-        }
-
-        /* Nuevo contenedor que envuelve la lista y el botón */
-        .container-flex {
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            margin: 10px;
-        }
-
-        /* Nuevo contenedor para alinear la tabla con los márgenes */
-        .table-container {
-            margin: 10px; /* Márgenes izquierdo y derecho iguales al margen del título */
-            width: calc(100% - 20px); /* Ancho total menos los márgenes */
-        }
-
-        /* Estilo para hacer que la tabla ocupe todo el espacio horizontal */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        /* Estilo para el encabezado de la tabla */
-        table th {
-            background-color: red;
-            color: white;
-            padding: 5px; /* Ajustado para hacer que el ancho de la fila sea menor */
-        }
-
-        /* Estilo para las celdas de la tabla */
-        table td {
-            padding: 2px; /* Ajustado para hacer que el ancho de la fila sea menor */
-        }
-
-        /* Estilo para las filas impares */
-        table tr:nth-child(odd) {
-            background-color: #f2f2f2;
-        }
-
-        /* Estilo para las filas pares */
-        table tr:nth-child(even) {
-            background-color: #ffffff;
-        }
-
-        /* Estilo para centrar el botón dentro de la celda de la tabla */
-        table td button {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            height: 100%;
-        }
-
-
-    </style>
+    <script src="scripts.js" defer></script>
 </head>
 <body>
 
+    <!-- Título y Logo -->
     <div class="titulo-container">
         <img src="{{ url_for('static', filename='imagenes/logo_blanco.png') }}" alt="Logo" class="logo">
         <h1 class="titulo">STOCK CRÍTICO</h1>
+        <div class="carro-icon">
+            <a href="{{ url_for('carro_compras') }}" target="_blank">
+                <img src="{{ url_for('static', filename='imagenes/carro.png') }}" alt="Carro de Compras">
+            </a>
+        </div>
     </div>
 
-    <!-- Nuevo contenedor que envuelve la lista y el botón -->
+    <!-- Dropdown y Botón de Actualizar -->
     <div class="container-flex">
-        <!-- Contenedor de la lista desplegable -->
         <div class="dropdown-container">
             <img src="{{ url_for('static', filename='imagenes/icono_ordenar.png') }}" alt="Icono">
             <select id="ordenarPor">
@@ -147,30 +36,18 @@
                 <option value="precio">Precio</option>
             </select>
         </div>
-
-        <!-- Botón de Actualizar -->
         <button class="actualizar-button">Actualizar</button>
     </div>
 
+    <!-- Contenido Principal -->
     <div class="contenido">
-        <!-- Nuevo contenedor para alinear la tabla con los márgenes -->
         <div class="table-container">
+            <!-- Contenedor de la Tabla -->
             <div class="iframe-container">
                 {{ tabla | safe }}
             </div>
         </div>
     </div>
-    
-    <!-- Tu código JavaScript puede ir aquí si es necesario -->
-    <!-- Aquí viene el nuevo bloque de JavaScript -->
-    <script>
-        $(document).ready(function() {
-            // Escucha para el evento de clic en cualquier elemento con la clase "lupa-button"
-            $('.lupa-button').click(function() {
-                const sku = $(this).attr('data-sku'); // Obtener el SKU desde el atributo data-sku del botón
-                window.open(`/detalle/${sku}`, '_blank'); // Abrir una nueva ventana/tab con la URL "/detalle/SKU"
-            });
-        });
-    </script>
+
 </body>
 </html>

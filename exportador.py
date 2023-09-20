@@ -30,11 +30,11 @@ def exportacion_stock_critico(dataframe_productos, dataframe_ventas, dataframe_r
         
         # Verifica si la información es válida antes de agregarla
         if informacion is not None:
-            sku, nombre, comprar = informacion
-            filas.append([sku, nombre, comprar])
+            sku, nombre, proovedor, informacion_1, informacion_2, comprar = informacion
+            filas.append([sku, nombre, proovedor, informacion_1, informacion_2, comprar])
 
     # Crea un DataFrame con las filas y columnas especificadas
-    columnas = ["SKU", "NOMBRE DEL PRODUCTO", "CANTIDAD A COMPRAR"]
+    columnas = ["SKU", "NOMBRE DEL PRODUCTO", "PROOVEDOR", "INFORMACIÓN 1", "INFORMACIÓN 2", "CANTIDAD A COMPRAR"]
     df_exportacion = pd.DataFrame(filas, columns=columnas)
     tabla_html = df_exportacion.to_html()
 

@@ -1,0 +1,47 @@
+/* Estilos generales */
+body {
+    font-family: "Helvetica", sans-serif;
+}
+
+/* -------------- Estilos del Título -------------- */
+
+.titulo-container {
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    border-radius: 10px;
+    background-color: #444;
+    margin: 10px;
+}
+
+.logo {
+    width: 120px;
+    margin-right: 20px;
+    margin-left: 20px;
+}
+
+.titulo {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 0;
+    text-align: center;
+    color: white;
+}
+
+/* -------------- Estilos del contenedor de Productos -------------- */
+
+.productos-container {
+    margin: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.producto {
+    margin: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}

@@ -44,6 +44,7 @@ class ProcesadorSku():
         self.nombre = self.obtener_nombre()
         self.tipo = self.obtener_tipo()
         self.stock = self.obtener_stock()
+        self.proovedor = "Proovedor"
         
 
     # Función para verificar sku válido
@@ -238,7 +239,7 @@ class ProcesadorSku():
     def informacion_compactada(self):
         unidades = self.deteccion()
         if isinstance(unidades, int) and unidades >= 1:
-            return (self.sku, self.nombre, unidades)
+            return (self.sku, self.nombre, self.proovedor, None, None, unidades)
         
     def informacion_detallada(self):
         informacion = [self.sku, self.nombre, self.tipo]

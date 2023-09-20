@@ -1,0 +1,133 @@
+/* Estilos generales */
+body {
+    font-family: "Helvetica", sans-serif;
+}
+
+/* -------------- Estilos del Título -------------- */
+
+.titulo-container {
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    border-radius: 10px;
+    background-color: #444;
+    margin: 10px;
+}
+
+.logo {
+    width: 120px;
+    margin-right: 20px;
+    margin-left: 20px;
+}
+
+.titulo {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 0;
+    text-align: center;
+    color: white;
+}
+
+.carro-icon img {
+    width: 40px;
+    margin-right: 20px;
+    margin-left: 20px;
+    cursor: pointer;
+}
+
+/* -------------- Estilos del Contenido -------------- */
+
+/* Estilos de la tabla */
+
+.iframe-container {
+    width: 100%;
+    height: 600px;
+}
+
+.table-container {
+    margin: 10px;
+    width: calc(100% - 20px);
+}
+
+/* Estilos de las celdas de la tabla */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table th {
+    background-color: red;
+    color: white;
+    padding: 5px;
+    text-align: center;
+}
+
+table td {
+    padding: 2px;
+}
+
+/* Estilos de las filas de la tabla */
+
+table tr:nth-child(odd) {
+    background-color: #f2f2f2;
+}
+
+table tr:nth-child(even) {
+    background-color: #ffffff;
+}
+
+/* -------------- Estilos del Dropdown y Botón de Actualizar -------------- */
+
+.dropdown-container {
+    background-color: #ffd200;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    border-radius: 10px;
+    margin: 10px;
+    width: 200px;
+    height: 15px;
+}
+
+.dropdown-container img {
+    width: 24px;
+    height: 24px;
+    margin-right: 10px;
+}
+
+select {
+    flex: 1;
+}
+
+.actualizar-button {
+    background-color: #ffd200;
+    color: black;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+/* -------------- Estilos del Contenedor que Envuelve Dropdown y Botón -------------- */
+
+.container-flex {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin: 10px;
+}
+
+/* -------------- Estilos de Botones dentro de la tabla -------------- */
+
+.button-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pulsado {
+    background-color: rgb(187, 182, 182) !important;
+}
