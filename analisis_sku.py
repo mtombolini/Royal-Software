@@ -260,16 +260,42 @@ class ProcesadorSku():
         kardex_filtrado = kardex[(kardex['Fecha'] >= pd.Timestamp(fecha_inicio)) & (kardex['Fecha'] <= pd.Timestamp(self.f_fin))]
 
         # Crear el gráfico con Bokeh
-        p = figure(title=f"Rotación de Stock para SKU {self.sku}", x_axis_label='Fecha', y_axis_label='Stock',
-                   x_axis_type="datetime")
-        p.line(kardex_filtrado['Fecha'], kardex_filtrado['Stock'], legend_label="Stock", line_width=2)
+        p = figure(
+            title=f"Stock - Ventas (SKU: {self.sku})", 
+            x_axis_label='Fecha', 
+            y_axis_label='Unidades',
+            x_axis_type="datetime",
+            width=670,           # Ancho del gráfico
+            height=400,          # Alto del gráfico
+            background_fill_color="#f5f5f5",   # Color de fondo del gráfico
+            border_fill_color="#e5e5e5"        # Color de fondo alrededor del gráfico
+        )
+
+        # Personalizar etiquetas
+        p.title.text_font_style = "bold"       # Título en negrita
+        p.xaxis.axis_label_text_font_style = "bold"  # Etiqueta del eje X en negrita
+        p.yaxis.axis_label_text_font_style = "bold"  # Etiqueta del eje Y en negrita
+
+        # Personalizar la rejilla y bordes
+        p.grid.grid_line_color = "#cccccc"
+        p.outline_line_color = "#333333"       # Color del borde del gráfico
+
+        # Personalizar leyenda
+        p.legend.background_fill_alpha = 0.6   # Transparencia del fondo
+        p.legend.location = "top_left"         # Ubicación
+        p.legend.orientation = "horizontal"    # Orientación
+
+        # Datos y visualización
+        p.step(kardex_filtrado['Fecha'], kardex_filtrado['Stock'], legend_label="Stock", mode="after", line_width=3, line_color="black")
 
         # Guardar en un archivo HTML
         filename = f"static/graficos/grafico_{self.sku}.html"
         output_file(filename)
         save(p)
-        
+
         return filename
+
+
 
 
 
