@@ -14,6 +14,9 @@ import re
 from statsmodels.tsa.arima.model import ARIMA
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 from statsmodels.tsa.stattools import adfuller, acf, pacf
+from bokeh.plotting import figure, show, output_file
+from bokeh.embed import components
+from bokeh.io import output_file, save
 
 
 # --------------------------
@@ -22,13 +25,13 @@ from statsmodels.tsa.stattools import adfuller, acf, pacf
 
 
 class ProcesadorSku():
-    def __init__(self, dataframe_productos, dataframe_venta, dataframe_recepcion, dataframe_stock, sku, fecha_inicio, fecha_fin):
+    def __init__(self, dataframe_productos, dataframe_venta, dataframe_recepcion, dataframe_stock, sku):
         # Input
         self.sku = sku
         
         # Parámetros de análisis
-        self.f_inicio = fecha_inicio
-        self.f_fin = fecha_fin
+        self.f_inicio = "01/09/2022"
+        self.f_fin = datetime.now()
 
         # Dataframes
         self.df_venta = dataframe_venta[(dataframe_venta['SKU'] == sku) & (dataframe_venta['Fecha Venta'] >= self.f_inicio) & (dataframe_venta['Fecha Venta'] <= self.f_fin)]
@@ -129,7 +132,7 @@ class ProcesadorSku():
         df_kardex = df_kardex.dropna(subset=['Tipo Movimiento'])
         df_kardex = df_kardex.loc[:, ['Fecha', 'SKU', 'Cantidad', 'Tipo Movimiento', 'Stock']]
         
-        # df_kardex.to_excel("kardex.xlsx", index=False)
+        df_kardex.to_excel("kardex.xlsx", index=False)
 
         return df_kardex
 
@@ -152,7 +155,7 @@ class ProcesadorSku():
     def stock_tiempo(self):
         kardex = self.kardex()
         df_vacio = pd.DataFrame(pd.date_range(start=self.f_inicio, end=self.f_fin), columns=['Fecha'])
-        df_ajustado = df_completo = pd.merge(df_vacio, kardex, on='Fecha', how='left')
+        df_ajustado = pd.merge(df_vacio, kardex, on='Fecha', how='left')
         df_ajustado['Stock'].ffill(inplace=True)
         return df_ajustado
 
@@ -248,11 +251,27 @@ class ProcesadorSku():
     def informacion_estadistica(self):
         informacion = [self.tipo, self.sku]
         return informacion
+    
+
+    def grafica_ventas(self, fecha_inicio):
+        kardex = self.kardex()
+
+        # Filtrar los datos desde la fecha de inicio hasta la fecha final
+        kardex_filtrado = kardex[(kardex['Fecha'] >= pd.Timestamp(fecha_inicio)) & (kardex['Fecha'] <= pd.Timestamp(self.f_fin))]
+
+        # Crear el gráfico con Bokeh
+        p = figure(title=f"Rotación de Stock para SKU {self.sku}", x_axis_label='Fecha', y_axis_label='Stock',
+                   x_axis_type="datetime")
+        p.line(kardex_filtrado['Fecha'], kardex_filtrado['Stock'], legend_label="Stock", line_width=2)
+
+        # Guardar en un archivo HTML
+        filename = f"static/graficos/grafico_{self.sku}.html"
+        output_file(filename)
+        save(p)
+        
+        return filename
+
 
 
                 
                 
-
-
-
-

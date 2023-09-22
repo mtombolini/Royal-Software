@@ -2,6 +2,7 @@ from flask import Flask, render_template, url_for, jsonify, request, send_file
 from flask_sqlalchemy import SQLAlchemy
 import exportador  # Asegúrate de tener este módulo en tu proyecto
 import pandas as pd  # Asegúrate de instalar pandas si no lo has hecho
+import os
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///carro_compras.db'
@@ -52,26 +53,48 @@ def stock_roto_page():
     tabla_html = df.to_html(escape=False)
     return render_template('stock_critico.html', tabla=tabla_html)
 
+
 @app.route('/detalle/<sku>')
 def detalle(sku):
-    return render_template('detalle.html', sku=sku)
+    grafico_path = grafico(sku)  # Llama a la función grafico() para obtener la ruta del gráfico.
+    return render_template('detalle.html', sku=sku, grafico_path=grafico_path)
 
-@app.route('/informacion_detallada/<sku>')
-def informacion_detallada(sku):
-    info_producto, info_estadistica = exportador.exportacion_detalle_producto(
+
+@app.route('/grafico/<sku>')
+def grafico(sku):
+    procesador = exportador.exportacion_detalle_producto(
         sku,
         exportador.dataframe_productos,
         exportador.dataframe_ventas,
         exportador.dataframe_recepcion,
         exportador.dataframe_stock,
-        exportador.fecha_inicio,
-        exportador.fecha_fin
     )
+    
+    file_path = procesador.grafica_ventas("01/09/2022")
+    
+    # Devuelve la ruta del archivo para ser usado en el iframe.
+    return url_for('static', filename=f'graficos/grafico_{sku}.html')
+
+
+
+
+@app.route('/informacion_detallada/<sku>')
+def informacion_detallada(sku):
+    procesador = exportador.exportacion_detalle_producto(
+        sku,
+        exportador.dataframe_productos,
+        exportador.dataframe_ventas,
+        exportador.dataframe_recepcion,
+        exportador.dataframe_stock,
+    )
+
+    info_producto = procesador.informacion_detallada()
+    info_estadistica = procesador.informacion_estadistica()
 
     return jsonify({
         "info_producto": info_producto,
         "info_estadistica": info_estadistica
-    })    
+    }) 
 
 @app.route('/registrar_respuesta', methods=['POST'])
 def registrar_respuesta():

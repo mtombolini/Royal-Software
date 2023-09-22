@@ -1,10 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ sku }}</title>
+
+    <!-- Recurso de jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
     <style>
         body {
             font-family: "Helvetica", sans-serif;
@@ -35,17 +39,26 @@
             color: white;
         }
 
+        .contenido-container {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
         .informacion-container {
             padding: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-wrap: wrap;
+            flex: 1;
             border-radius: 10px;
             background-color: red;
             color: white;
             margin: 20px 10px 10px 10px;
-            width: 40%;
+        }
+
+        .contenedor-grafico {
+            flex: 1;
+            margin: 20px 10px 10px 10px;
+            background-color: lightgray;
+            padding: 20px;
+            border-radius: 10px;
         }
 
         .subtitulo-1 {
@@ -55,8 +68,16 @@
             text-align: center;
             color: white;
         }
+
+        .subtitulo-2 {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0;
+            text-align: center;
+        }
     </style>
 </head>
+
 <body>
 
     <div class="titulo-container">
@@ -64,19 +85,27 @@
         <h1 class="titulo">{{ sku }}</h1>
     </div>
 
-    <div class="informacion-container">
-        <h1 class="subtitulo-1">INFORMACION DEL PRODUCTO</h1>
+    <div class="contenido-container">
+        <div class="informacion-container">
+            <h1 class="subtitulo-1">INFORMACION DEL PRODUCTO</h1>
+        </div>
+
+        <div class="contenedor-grafico">
+            <h1 class="subtitulo-2">GRÁFICA</h1>
+            <iframe src="{{ grafico_path }}" width="100%" height="600"></iframe>
+        </div>
     </div>
 
-    <!-- Aquí viene el nuevo bloque de JavaScript -->
     <script>
         $(document).ready(function() {
             // Hacer una llamada AJAX para obtener información del producto
-            $.get(`/informacion_detallada/{{ sku }}`, function(data) {
-                // data será un objeto JSON con "info_producto" e "info_estadistica"
-                // Aquí puedes actualizar el HTML como desees, por ejemplo:
+            $.get(`/informacion_detallada/{{ sku }}`)
+            .done(function(data) {
                 $(".informacion-container").append("<p>Información del Producto: " + data.info_producto + "</p>");
                 $(".informacion-container").append("<p>Información Estadística: " + data.info_estadistica + "</p>");
+            })
+            .fail(function() {
+                console.log("Error al cargar la información del producto.");
             });
         });
     </script>
