@@ -31,7 +31,7 @@ def exportacion_stock_critico(dataframe_productos, dataframe_ventas, dataframe_r
             sku, nombre, proovedor, informacion_1, informacion_2, comprar = informacion
             filas.append([sku, nombre, proovedor, informacion_1, informacion_2, comprar])
 
-    columnas = ["SKU", "NOMBRE DEL PRODUCTO", "PROOVEDOR", "INFORMACIÓN 1", "INFORMACIÓN 2", "CANTIDAD A COMPRAR"]
+    columnas = ["SKU", "NOMBRE DEL PRODUCTO", "PROOVEDOR", "COSTO NETO", "INFORMACIÓN 2", "CANTIDAD A COMPRAR"]
     df_exportacion = pd.DataFrame(filas, columns=columnas)
     return df_exportacion
 

@@ -217,8 +217,8 @@ fecha_fin_analisis = pd.to_datetime('2023-08-31')
 
 sku = '22121-HKE-000'
 sku = 'S026'
-sku = 'VF032'
-#sku = '400666'
+sku = '1775'
+sku = '6010262'
 
 
 procesador_sku = ProcesadorSku(dataframe_productos, dataframe_ventas, dataframe_stock, sku, fecha_inicio_analisis, fecha_fin_analisis)

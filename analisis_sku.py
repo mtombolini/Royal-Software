@@ -48,6 +48,7 @@ class ProcesadorSku():
         self.tipo = self.obtener_tipo()
         self.stock = self.obtener_stock()
         self.proovedor = "Proovedor"
+        self.costo_neto = self.obtener_costo_neto()
         
 
     # Función para verificar sku válido
@@ -101,8 +102,32 @@ class ProcesadorSku():
         if self.verificacion_sku:
             stock_total = self.df_stock['Stock'].sum()
             return stock_total
-    
         
+
+    # Función para obtener el costo neto de la última unidad comprada.
+    def obtener_costo_neto(self):
+        if self.verificacion_sku:
+            # Sumar todos los stocks del mismo SKU
+            costo_neto_promedio = self.df_stock['Costo Neto Prom. Unitario'].sum()
+
+            # Filtrar filas donde "Documento de Recepción" contiene "Factura" 
+            # y luego ordenarlas por "Fecha" de manera descendente.
+            df_factura = self.df_recepcion[self.df_recepcion['Documento de Recepción'].str.contains('Factura')]
+            df_factura = df_factura.sort_values(by='Fecha', ascending=False)
+            
+            # Tomar el "Costo Neto Unitario" de la fila más reciente
+            if not df_factura.empty:
+                costo_ultima_compra = df_factura['Costo Neto Unitario'].iloc[0]
+            else:
+                costo_ultima_compra = 0  # Puedes cambiar esto a otro valor por defecto si lo necesitas
+
+            if costo_neto_promedio != 0:
+                return costo_neto_promedio
+            else:
+                return costo_ultima_compra
+
+
+    
     # Función para crear dataframe general (tarjeta de existencia)
     def kardex(self):
         df_recepcion = self.df_recepcion.copy()
@@ -242,7 +267,7 @@ class ProcesadorSku():
     def informacion_compactada(self):
         unidades = self.deteccion()
         if isinstance(unidades, int) and unidades >= 1:
-            return (self.sku, self.nombre, self.proovedor, None, None, unidades)
+            return (self.sku, self.nombre, self.proovedor, self.costo_neto, None, unidades)
         
     def informacion_detallada(self):
         informacion = [self.sku, self.nombre, self.tipo]
@@ -265,7 +290,7 @@ class ProcesadorSku():
             x_axis_label='Fecha', 
             y_axis_label='Unidades',
             x_axis_type="datetime",
-            width=670,           # Ancho del gráfico
+            width=660,           # Ancho del gráfico
             height=400,          # Alto del gráfico
             background_fill_color="#f5f5f5",   # Color de fondo del gráfico
             border_fill_color="#e5e5e5"        # Color de fondo alrededor del gráfico

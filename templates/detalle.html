@@ -5,110 +5,58 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ sku }}</title>
-
-    <!-- Recurso de jQuery -->
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/detalle.css') }}">
+    <script src="{{ url_for('static', filename='js/detalle.js') }}" defer></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-    <style>
-        body {
-            font-family: "Helvetica", sans-serif;
-        }
-
-        .titulo-container {
-            padding: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-wrap: wrap;
-            border-radius: 10px;
-            background-color: #444;
-            margin: 10px;
-        }
-
-        .logo {
-            width: 120px;
-            margin-right: 20px;
-            margin-left: 20px;
-        }
-
-        .titulo {
-            font-size: 24px;
-            font-weight: bold;
-            margin: 0;
-            text-align: center;
-            color: white;
-        }
-
-        .contenido-container {
-            display: flex;
-            flex-wrap: wrap;
-        }
-
-        .informacion-container {
-            padding: 10px;
-            flex: 1;
-            border-radius: 10px;
-            background-color: red;
-            color: white;
-            margin: 20px 10px 10px 10px;
-        }
-
-        .contenedor-grafico {
-            flex: 1;
-            margin: 20px 10px 10px 10px;
-            background-color: lightgray;
-            padding: 20px;
-            border-radius: 10px;
-        }
-
-        .subtitulo-1 {
-            font-size: 18px;
-            font-weight: bold;
-            margin: 0;
-            text-align: center;
-            color: white;
-        }
-
-        .subtitulo-2 {
-            font-size: 18px;
-            font-weight: bold;
-            margin: 0;
-            text-align: center;
-        }
-    </style>
 </head>
 
 <body>
-
     <div class="titulo-container">
         <img src="{{ url_for('static', filename='imagenes/logo_blanco.png') }}" alt="Logo" class="logo">
         <h1 class="titulo">{{ sku }}</h1>
     </div>
 
     <div class="contenido-container">
-        <div class="informacion-container">
-            <h1 class="subtitulo-1">INFORMACION DEL PRODUCTO</h1>
+        <div class="informacion-producto"> <!-- Contenedor adicional -->
+            <div class="titulo-informacion">
+                <h1 class="subtitulo-1">INFORMACION DEL PRODUCTO</h1>
+            </div>
+            <div class="contenido-informacion">
+            </div>
         </div>
 
         <div class="contenedor-grafico">
             <h1 class="subtitulo-2">GRÁFICA</h1>
-            <iframe src="{{ grafico_path }}" width="100%" height="600"></iframe>
+            <iframe src="{{ grafico_path }}" width="100%" height="400"></iframe>
+        </div>
+
+        <div class="contenedor-botones">
+            <h2>OPCIONES</h2>
+            <div class="botones-decision">
+                <button class="boton-icono" data-id="izquierdo">
+                    <img src="{{ url_for('static', filename='imagenes/aceptar.png') }}">
+                </button>
+                <button class="boton-icono" data-id="centro">
+                    <img src="{{ url_for('static', filename='imagenes/pausa.png') }}">
+                </button>
+                <button class="boton-icono">
+                    <img src="{{ url_for('static', filename='imagenes/rechazado.png') }}">
+                </button>
+            </div>
+            <div class="input-decision">
+                <input type="text" placeholder="Ingresa texto aquí">
+                <button>Aceptar</button>
+                <button class="boton-cancelar">Cancelar</button>
+            </div>
         </div>
     </div>
-
-    <script>
-        $(document).ready(function() {
-            // Hacer una llamada AJAX para obtener información del producto
-            $.get(`/informacion_detallada/{{ sku }}`)
-            .done(function(data) {
-                $(".informacion-container").append("<p>Información del Producto: " + data.info_producto + "</p>");
-                $(".informacion-container").append("<p>Información Estadística: " + data.info_estadistica + "</p>");
-            })
-            .fail(function() {
-                console.log("Error al cargar la información del producto.");
-            });
-        });
-    </script>
-
 </body>
+
+<script>
+    var sku = "{{ sku }}";
+</script>
+<script src="scripts.js" defer></script>
+
 </html>
