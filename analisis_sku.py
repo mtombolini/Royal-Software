@@ -101,6 +101,8 @@ class ProcesadorSku():
     def obtener_stock(self):
         if self.verificacion_sku:
             stock_total = self.df_stock['Stock'].sum()
+            df = self.df_stock
+            df.to_excel("a.xlsx")
             return stock_total
         
 
@@ -270,7 +272,7 @@ class ProcesadorSku():
             return (self.sku, self.nombre, self.proovedor, self.costo_neto, None, unidades)
         
     def informacion_detallada(self):
-        informacion = [self.sku, self.nombre, self.tipo]
+        informacion = [self.sku, self.nombre, self.tipo, self.stock]
         return informacion
     
     def informacion_estadistica(self):

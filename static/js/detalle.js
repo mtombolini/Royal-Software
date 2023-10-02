@@ -9,6 +9,7 @@ $(document).ready(function() {
             contenidoProducto += "Nombre del producto: " + data.info_producto[0] + "<br>";
             contenidoProducto += "SKU: " + data.info_producto[1] + "<br>";
             contenidoProducto += "Tipo: " + data.info_producto[2] + "<br>";
+            contenidoProducto += "Stock: " + data.info_producto[3] + "<br>";
         } else {
             contenidoProducto += data.info_producto; // En caso de que no sea una lista, mostrar el contenido directamente.
         }

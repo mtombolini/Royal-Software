@@ -41,3 +41,7 @@ def exportacion_detalle_producto(sku, dataframe_productos, dataframe_ventas, dat
 
 # Programa principal
 tabla_stock_critico = exportacion_stock_critico(dataframe_productos, dataframe_ventas, dataframe_recepcion, dataframe_stock, lista_sku)
+
+sku = '1500'
+test = exportacion_detalle_producto(sku, dataframe_productos, dataframe_ventas, dataframe_recepcion, dataframe_stock)
+print(test.obtener_stock())
